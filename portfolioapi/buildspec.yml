@@ -1,0 +1,17 @@
+version: 0.2
+phases:
+  install:
+    runtime-versions:
+      dotnet: 6.0
+  pre_build:
+    commands:
+      - dotnet restore portfolioapi/portfolioapi.csproj
+  build:
+    commands:
+      - dotnet build portfolioapi/portfolioapi.csproj
+  post_build:
+    commands:
+      - dotnet publish -c Release -o ./app/ portfolioapi/portfolioapi.csproj
+artifacts:
+  files:
+    - '**/*'
