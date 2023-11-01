@@ -38,6 +38,10 @@ builder.Logging.AddConsole();*/
 
 builder.Services.AddHttpClient();
 var app = builder.Build();
+app.UseCors(builder => builder
+    .AllowAnyOrigin()
+    .AllowAnyMethod()
+    .AllowAnyHeader());
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -45,9 +49,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-app.UseCors(
-    options => options.WithOrigins("http://localhost:3000/").AllowAnyMethod()
-);
+
 
 app.UseHttpsRedirection();
 
