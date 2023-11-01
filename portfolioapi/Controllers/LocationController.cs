@@ -34,8 +34,6 @@ namespace portfolioapi.Controllers
             var returnedResponse = await _location.GetLocation(ip_address);
  
             var response = _commonInterface.convertResultSet<Location>(returnedResponse, _mapper);
-            Response.Headers.Add("Access-Control-Allow-Origin", "*");
-            Response.Headers.Add("Access-Control-Allow-Methods", "*");
             return response;
         }
     }

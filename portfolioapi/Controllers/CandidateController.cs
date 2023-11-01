@@ -41,8 +41,7 @@ namespace portfolioapi.Controllers
             _logger.LogInformation(jsonStr);
             _logger.LogError(jsonStr);
             _logger.LogWarning(jsonStr);
-            Response.Headers.Add("Access-Control-Allow-Origin", "*");
-            Response.Headers.Add("Access-Control-Allow-Methods", "*");
+
             return response;
 
         }
