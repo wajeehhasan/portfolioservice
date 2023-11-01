@@ -31,8 +31,11 @@ namespace portfolioapi.Controllers
         public async Task<GenericResultSet<Location>> Location(string ip_address)
         {
             GenericResultSet<Location> response = new();
+            Console.WriteLine(ip_address);
             var returnedResponse = await _location.GetLocation(ip_address);
+            Console.WriteLine(returnedResponse);
             response = _commonInterface.convertResultSet<Location>(returnedResponse, _mapper);
+            Console.WriteLine(response);
             return response;
         }
     }
