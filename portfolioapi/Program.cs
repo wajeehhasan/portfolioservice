@@ -4,6 +4,9 @@ using DATA.Services;
 using LOGIC.Implementation;
 using LOGIC.Interface;
 using LOGIC.Model;
+using portfolioapi;
+
+Helper.SetEbConfig();
 
 var builder = WebApplication.CreateBuilder(args);
 
