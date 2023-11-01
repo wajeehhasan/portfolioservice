@@ -36,12 +36,15 @@ namespace portfolioapi.Controllers
                 
                 var returnedOBj = await _listingInterface.GetPricedListings(noOfPassengers);
                 response = _commonInterface.convertResultSet<Listing>(returnedOBj, _mapper);
+                Response.Headers.Add("Access-Control-Allow-Origin", "*");
+                Response.Headers.Add("Access-Control-Allow-Methods", "*");
                 return response;
             }
             catch (Exception ex)
             {
                 response.message =  ex.Message;
-
+                Response.Headers.Add("Access-Control-Allow-Origin", "*");
+                Response.Headers.Add("Access-Control-Allow-Methods", "*");
                 return response;
             }
 
