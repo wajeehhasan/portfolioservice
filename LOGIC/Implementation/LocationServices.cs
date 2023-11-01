@@ -27,6 +27,7 @@ namespace LOGIC.Implementation
                 GenericResultSet<LocationLOGIC> responseDTO = new();
                 var ipDetails = await _locationOperations.GetIpDetailsAsync(ip_address);
                 responseDTO = _commonInterface.convertResultSet<LocationLOGIC>(ipDetails, _mapper);
+                Console.WriteLine("Logic/LocationService Response: " + responseDTO.resultSet + ", " + responseDTO.message);
                 return responseDTO;
 
             }

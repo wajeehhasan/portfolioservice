@@ -29,6 +29,7 @@ namespace DATA.Services
                 var returnedObj = await _httpOperations.GetHttpResponse(url, queryParams);
 
                 response = _httpOperations.GenericResponseGenerate<LocationData>(returnedObj);
+                Console.WriteLine("Data/LocationOperation Response: " + response.resultSet + ", " + response.message);
                 return response;
             }
             catch (Exception ex)

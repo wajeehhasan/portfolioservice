@@ -37,6 +37,7 @@ namespace DATA.Services
 
                 builder.Query = query.ToString();
                 var fullUrl = builder.ToString();
+                Console.WriteLine("fullUrl = "+fullUrl);
 
                 var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, fullUrl);
 
