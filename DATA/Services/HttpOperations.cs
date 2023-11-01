@@ -18,7 +18,7 @@ namespace DATA.Services
     
         }
 
-        public async Task<GenericResultSet<string>> GetHttpResponse(string url, Dictionary<string, string>? queryParams=null)
+        public async Task<GenericResultSet<string>> GetHttpResponse(string url, Dictionary<string, string> queryParams=null)
         {
             
             
@@ -57,6 +57,7 @@ namespace DATA.Services
                     response.status = false;
                     response.message = httpResponseMessage.ReasonPhrase;
                 }
+                Console.WriteLine("Data/HttpOperation Response: "+response.resultSet+ ", "+response.message);
                 return response;
             }
             catch (Exception ex)

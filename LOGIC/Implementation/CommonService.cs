@@ -9,11 +9,13 @@ namespace LOGIC.Implementation
     {
         public DATA.Models.GenericResultSet<DestinationResultSet> convertResultSet<DestinationResultSet>(DATA.Models.GenericResultSet<SourceResultSet> sourceResultSet,IMapper _mapper)
         {
+            Console.WriteLine("CommonService: SourceResultSEt: " + sourceResultSet.resultSet);
             GenericResultSet<DestinationResultSet> returnResultSet = new(){
                 status = sourceResultSet.status,
                 message = sourceResultSet.message,
                 resultSet = _mapper.Map<DestinationResultSet>(sourceResultSet.resultSet)
         };
+            Console.WriteLine("Converted ResultSET " + returnResultSet.resultSet);
             return returnResultSet;
         }
     }
