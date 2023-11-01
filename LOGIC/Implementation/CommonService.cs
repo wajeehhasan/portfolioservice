@@ -15,7 +15,7 @@ namespace LOGIC.Implementation
                 message = sourceResultSet.message,
                 resultSet = _mapper.Map<DestinationResultSet>(sourceResultSet.resultSet)
         };
-            Console.WriteLine("Converted ResultSET " + returnResultSet.resultSet);
+
             return returnResultSet;
         }
     }

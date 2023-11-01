@@ -20,18 +20,17 @@ namespace DATA.Services
             try
             {
                 GenericResultSet<LocationData> response = new();
-
-                var url = "http://api.ipstack.com/" + ip_address; 
-                Console.WriteLine(url);
+                var ipStackUrl = Environment.GetEnvironmentVariable("IpStackUrl");
+                var ipStackKey = Environment.GetEnvironmentVariable("IpstackAccessKey");
+                var url = ipStackUrl + ip_address; 
                 var queryParams = new Dictionary<string, string>(){
-                {"access_key", "e4004debe47a8006abb8fa6b6858f97c"}
+                {"access_key", ipStackKey}
             };
 
-                Console.WriteLine(_config.GetSection("IpStackUrl").Value);
+       
                 var returnedObj = await _httpOperations.GetHttpResponse(url, queryParams);
 
                 response = _httpOperations.GenericResponseGenerate<LocationData>(returnedObj);
-                Console.WriteLine("Data/LocationOperation Response: " + response.resultSet + ", " + response.message);
                 return response;
             }
             catch (Exception ex)

@@ -30,11 +30,11 @@ namespace portfolioapi.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<GenericResultSet<Location>> Location(string ip_address)
         {
-            Console.WriteLine("This is thge IP: "+ip_address);
+
             var returnedResponse = await _location.GetLocation(ip_address);
-            Console.WriteLine("LocationController ResultSEt Htttp: "+returnedResponse.resultSet);
+ 
             var response = _commonInterface.convertResultSet<Location>(returnedResponse, _mapper);
-            Console.WriteLine("Data/HttpOperation Response: " + response.resultSet + ", " + response.message);
+
             return response;
         }
     }

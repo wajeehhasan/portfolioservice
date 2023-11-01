@@ -40,7 +40,7 @@ namespace portfolioapi.Controllers
             }
             catch (Exception ex)
             {
-                response.message = "FAILED WITH = "+ ex.Message;
+                response.message =  ex.Message;
 
                 return response;
             }

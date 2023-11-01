@@ -37,7 +37,7 @@ namespace DATA.Services
 
                 builder.Query = query.ToString();
                 var fullUrl = builder.ToString();
-                Console.WriteLine("fullUrl = "+fullUrl);
+    
 
                 var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, fullUrl);
 
@@ -57,7 +57,7 @@ namespace DATA.Services
                     response.status = false;
                     response.message = httpResponseMessage.ReasonPhrase;
                 }
-                Console.WriteLine("Data/HttpOperation Response: "+response.resultSet+ ", "+response.message);
+   
                 return response;
             }
             catch (Exception ex)

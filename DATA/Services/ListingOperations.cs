@@ -20,7 +20,7 @@ namespace DATA.Services
         public async Task<GenericResultSet<ListingData>> GetAllListings()
         {
             GenericResultSet<ListingData> response = new();
-            var url = _config.GetSection("JayrideChallengeApi").Value;
+            var url = Environment.GetEnvironmentVariable("JayrideChallengeApi");
             var returnedObject = await _httpOperations.GetHttpResponse(url);
             response = _httpOperations.GenericResponseGenerate<ListingData>(returnedObject);
             return response;
