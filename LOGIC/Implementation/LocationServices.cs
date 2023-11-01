@@ -22,10 +22,19 @@ namespace LOGIC.Implementation
 
         public async Task<GenericResultSet<LocationLOGIC>> GetLocation(string ip_address)
         {
-            GenericResultSet<LocationLOGIC> responseDTO = new();
-            var ipDetails = await _locationOperations.GetIpDetailsAsync(ip_address);
-            responseDTO = _commonInterface.convertResultSet<LocationLOGIC>(ipDetails, _mapper);
-            return responseDTO;
+            try
+            {
+                GenericResultSet<LocationLOGIC> responseDTO = new();
+                var ipDetails = await _locationOperations.GetIpDetailsAsync(ip_address);
+                responseDTO = _commonInterface.convertResultSet<LocationLOGIC>(ipDetails, _mapper);
+                return responseDTO;
+
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
         }
     }
 }

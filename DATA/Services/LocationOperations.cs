@@ -16,18 +16,26 @@ namespace DATA.Services
         }
         public async Task<GenericResultSet<LocationData>> GetIpDetailsAsync(string ip_address)
         {
-            GenericResultSet<LocationData> response = new();
+            try
+            {
+                GenericResultSet<LocationData> response = new();
 
-            var url = _config.GetSection("IpStackUrl").Value + ip_address;
-            var queryParams = new Dictionary<string, string>(){
+                var url = _config.GetSection("IpStackUrl").Value + ip_address;
+                var queryParams = new Dictionary<string, string>(){
                 {"access_key", _config.GetSection("IpstackAccessKey").Value}
             };
 
 
-            var returnedObj = await _httpOperations.GetHttpResponse(url, queryParams);
+                var returnedObj = await _httpOperations.GetHttpResponse(url, queryParams);
 
-            response = _httpOperations.GenericResponseGenerate<LocationData>(returnedObj);
-            return response;
+                response = _httpOperations.GenericResponseGenerate<LocationData>(returnedObj);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
         }
 
 

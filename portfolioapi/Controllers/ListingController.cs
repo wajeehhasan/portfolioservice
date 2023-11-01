@@ -31,9 +31,20 @@ namespace portfolioapi.Controllers
         public async Task<GenericResultSet<Listing>> Listings(double noOfPassengers)
         {
             GenericResultSet<Listing> response = new();
-            var returnedOBj = await _listingInterface.GetPricedListings(noOfPassengers);
-            response = _commonInterface.convertResultSet<Listing>(returnedOBj, _mapper);
-            return response;
+            try
+            {
+                
+                var returnedOBj = await _listingInterface.GetPricedListings(noOfPassengers);
+                response = _commonInterface.convertResultSet<Listing>(returnedOBj, _mapper);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                response.message = "FAILED WITH = "+ ex.Message;
+
+                return response;
+            }
+
         }
     }
 }
