@@ -38,6 +38,8 @@ builder.Logging.AddConsole();*/
 
 builder.Services.AddHttpClient();
 var app = builder.Build();
+app.UseHttpsRedirection();
+app.UseHsts();
 app.UseCors(builder => builder
     .AllowAnyOrigin()
     .AllowAnyMethod()
