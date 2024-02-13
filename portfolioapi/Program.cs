@@ -1,3 +1,5 @@
+using Amazon.DynamoDBv2.DataModel;
+using Amazon.DynamoDBv2;
 using DATA.Interface;
 using DATA.Models;
 using DATA.Services;
@@ -5,6 +7,7 @@ using LOGIC.Implementation;
 using LOGIC.Interface;
 using LOGIC.Model;
 using portfolioapi;
+using Amazon.Extensions.NETCore.Setup;
 
 Helper.SetEbConfig();
 
@@ -37,6 +40,14 @@ builder.Services.AddScoped(typeof(ICommonInterface<,>), typeof(CommonService<,>)
 builder.Logging.AddConsole();*/
 
 builder.Services.AddHttpClient();
+
+builder.Services.AddDefaultAWSOptions(new AWSOptions
+{
+    Credentials = new Amazon.Runtime.BasicAWSCredentials(Environment.GetEnvironmentVariable("AWS_USERNAME"), Environment.GetEnvironmentVariable("AWS_PW")),
+    Region = Amazon.RegionEndpoint.APSoutheast2 
+});
+builder.Services.AddAWSService<IAmazonDynamoDB>();
+builder.Services.AddScoped<IDynamoDBContext, DynamoDBContext>();
 var app = builder.Build();
 app.UseHttpsRedirection();
 app.UseHsts();
