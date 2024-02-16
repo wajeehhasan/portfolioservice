@@ -3,6 +3,7 @@ using Amazon.DynamoDBv2;
 using Microsoft.AspNetCore.Mvc;
 using Amazon.DynamoDBv2.Model;
 using portfolioapi.Models;
+using Amazon.DynamoDBv2.DocumentModel;
 
 namespace portfolioapi.Controllers
 {
@@ -12,14 +13,22 @@ namespace portfolioapi.Controllers
     {
         private readonly IDynamoDBContext _context;
         private readonly IAmazonDynamoDB _dycontext;
+
+        //convert dynamodb Object to .net class
+        private T GetObject<T>(Dictionary<string, AttributeValue> image)
+        {
+            var document = Document.FromAttributeMap(image);
+            return _context.FromDocument<T>(document);
+        }
         public DynamoDbUserActivityController(IDynamoDBContext context, IAmazonDynamoDB dycontext)
         {
             _context = context;
             _dycontext = dycontext;
         }
-        [HttpGet("GetAllStudents")]
-        public async Task<IActionResult> GetAllStudents()
+        [HttpGet("GetAllUsers")]
+        public async Task<IActionResult> GetAllUsers()
         {
+            List<DyUserActivity> testList = new();
             try
             {
                 var request = new ScanRequest
@@ -28,8 +37,11 @@ namespace portfolioapi.Controllers
                 };
 
                 var response = await _dycontext.ScanAsync(request);
-                Console.WriteLine(response);
-                return Ok(response);
+                foreach(var item in response.Items)
+                {
+                    testList.Add(GetObject<DyUserActivity>(item));
+                }
+                return Ok(testList);
             }
             catch (AmazonDynamoDBException ex)
             {
@@ -54,11 +66,12 @@ namespace portfolioapi.Controllers
             try
             {
                 var response = await _dycontext.GetItemAsync(request);
+                var test = GetObject<DyUserActivity>(response.Item);
                 if (response.Item == null)
                 {
                     return NotFound();
                 }
-                return Ok(response);
+                return Ok(test);
             }
             catch (AmazonDynamoDBException ex)
             {
@@ -87,7 +100,7 @@ namespace portfolioapi.Controllers
                 {
                     return NotFound();
                 }
-                return Ok(response.Item["friendList"].L[0].NS);
+                return Ok(response.Item["friendList"].NS);
             }
             catch (AmazonDynamoDBException ex)
             {
@@ -116,7 +129,8 @@ namespace portfolioapi.Controllers
                 {
                     return NotFound();
                 }
-                return Ok(response.Item["friendRequest"].M["confirmRequestUserId"].L[0].NS);
+      
+                return Ok(response.Item["confirmRequestUserId"].NS);
             }
             catch (AmazonDynamoDBException ex)
             {
@@ -146,7 +160,8 @@ namespace portfolioapi.Controllers
                 {
                     return NotFound();
                 }
-                return Ok(response.Item["friendRequest"].M["sentRequestUserId"].L[0].NS);
+             
+                return Ok(response.Item["sentRequestUserId"].NS);
             }
             catch (AmazonDynamoDBException ex)
             {
@@ -154,28 +169,27 @@ namespace portfolioapi.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
-        [HttpGet("GetUserMessages/{userId}")]
-        public async Task<ActionResult<DyUserActivity>> GetUserMessages(string userId)
-        {
-            var tableName = "PortfolioUsersMessageAndFriendActivity";
 
-            var request = new GetItemRequest
+
+        [HttpGet("GetUserMessages/{userId}/{friendId}")]
+        public async Task<ActionResult<UserMessages>> GetUserMessages(string userId, string friendId)
+        {
+            var tableName = "UserMessages";
+      
+            var request = new ScanRequest
             {
                 TableName = tableName,
-                Key = new Dictionary<string, AttributeValue>
-                {
-                    { "UserId", new AttributeValue { N = userId } }
-                }
+                FilterExpression = "friendId = :v_FriendId AND userId = :v_UserId",
+                ExpressionAttributeValues = new Dictionary<string, AttributeValue>
+            {
+                {":v_FriendId", new AttributeValue {N = friendId}},
+                {":v_UserId", new AttributeValue {N = userId}}
+            }
             };
-
             try
             {
-                var response = await _dycontext.GetItemAsync(request);
-                if (response.Item == null)
-                {
-                    return NotFound();
-                }
-                return Ok(response.Item["friendRequest"].M["sentRequestUserId"].L[0].NS);
+                var response = await _dycontext.ScanAsync(request);
+                return Ok(response);
             }
             catch (AmazonDynamoDBException ex)
             {
@@ -183,37 +197,5 @@ namespace portfolioapi.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
-
-        //[HttpGet("/{userId}")]
-        //public async Task<ActionResult<DyUserActivity>> test(string userId)
-        //{
-        //    var tableName = "PortfolioUsersMessageAndFriendActivity";
-
-        //    var request = new GetItemRequest
-        //    {
-        //        TableName = tableName,
-        //        Key = new Dictionary<string, AttributeValue>
-        //        {
-        //            { "UserId", new AttributeValue { N = userId } }
-        //        }
-        //    };
-
-        //    try
-        //    {
-        //        var response = await _dycontext.GetItemAsync(request);
-        //        if (response.Item == null)
-        //        {
-        //            return NotFound();
-        //        }
-        //        return Ok(response);
-        //    }
-        //    catch (AmazonDynamoDBException ex)
-        //    {
-        //        //Handle DynamoDB exceptions
-        //        return StatusCode(500, ex.Message);
-        //    }
-        //}
-
-
     }
 }
