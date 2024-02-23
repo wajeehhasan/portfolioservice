@@ -4,6 +4,11 @@ using Microsoft.AspNetCore.Mvc;
 using Amazon.DynamoDBv2.Model;
 using portfolioapi.Models;
 using Amazon.DynamoDBv2.DocumentModel;
+using AutoMapper;
+using DATA.Models;
+using LOGIC.Interface;
+using LOGIC.Model;
+using System.Net;
 
 namespace portfolioapi.Controllers
 {
@@ -11,190 +16,171 @@ namespace portfolioapi.Controllers
     [ApiController]
     public class DynamoDbUserActivityController : ControllerBase
     {
-        private readonly IDynamoDBContext _context;
-        private readonly IAmazonDynamoDB _dycontext;
+        private readonly IMapper _mapper;
+        private readonly ICommonInterface<DyUserDetailsBLL, DyUserDetailsCont> _userDetailsConvert;
+        private readonly ICommonInterface<DyUserMessagesBLL, DyUserMessagesCont> _userMessageConvert;
+        private readonly ICommonInterface<List<DyUserDetailsBLL>, List<DyUserDetailsCont>> _userDetailsListConvert;
+        private readonly ICommonInterface<List<DyUserMessagesBLL>, List<DyUserMessagesCont>> _userMessageListConvert;
+        private readonly IDynamoUserInterface _dynamodbUserInterface;
 
-        //convert dynamodb Object to .net class
-        private T GetObject<T>(Dictionary<string, AttributeValue> image)
+        public DynamoDbUserActivityController(
+
+             IMapper mapper,
+             IDynamoUserInterface dynamodbUserInterface,
+             ICommonInterface<DyUserDetailsBLL, DyUserDetailsCont> userDetailsConvert,
+             ICommonInterface<DyUserMessagesBLL, DyUserMessagesCont> userMessageConvert,
+             ICommonInterface<List<DyUserDetailsBLL>, List<DyUserDetailsCont>> userDetailsListConvert,
+             ICommonInterface<List<DyUserMessagesBLL>, List<DyUserMessagesCont>> userMessageListConvert
+            )
         {
-            var document = Document.FromAttributeMap(image);
-            return _context.FromDocument<T>(document);
+            _userDetailsConvert = userDetailsConvert;
+            _userMessageConvert = userMessageConvert;
+            _userDetailsListConvert = userDetailsListConvert;
+            _userMessageListConvert = userMessageListConvert;
+            _dynamodbUserInterface = dynamodbUserInterface;
+
+            var configuration = new MapperConfiguration(cfg => cfg.AddMaps("portfolioapi"));
+            _mapper = new Mapper(configuration);
+        
         }
-        public DynamoDbUserActivityController(IDynamoDBContext context, IAmazonDynamoDB dycontext)
-        {
-            _context = context;
-            _dycontext = dycontext;
-        }
+
         [HttpGet("GetAllUsers")]
         public async Task<IActionResult> GetAllUsers()
         {
-            List<DyUserActivity> testList = new();
+            GenericResultSet<List<DyUserDetailsCont>> response = new();
             try
             {
-                var request = new ScanRequest
-                {
-                    TableName = "PortfolioUsersMessageAndFriendActivity"
-                };
-
-                var response = await _dycontext.ScanAsync(request);
-                foreach(var item in response.Items)
-                {
-                    testList.Add(GetObject<DyUserActivity>(item));
-                }
-                return Ok(testList);
+                var returnedObj = await _dynamodbUserInterface.GetAllUsers();
+                response = _userDetailsListConvert.convertResultSet<List<DyUserDetailsCont>>(returnedObj, _mapper);
+                return Ok(response);
             }
             catch (AmazonDynamoDBException ex)
             {
+                response.status = false;
+                response.message = ex.Message;
+                response.resultSet = null;
                 //Handle DynamoDB exceptions
-                return StatusCode(500, ex.Message);
+                return StatusCode(((int)ex.StatusCode), response);
             }
         }
         [HttpGet("GetusersbyID/{userId}")]
-        public async Task<ActionResult<DyUserActivity>> GetusersbyID(string userId)
+        public async Task<IActionResult> GetusersbyID(string userId)
         {
-            var tableName = "PortfolioUsersMessageAndFriendActivity";
-
-            var request = new GetItemRequest
-            {
-                TableName = tableName,
-                Key = new Dictionary<string, AttributeValue> 
-                {
-                    { "UserId", new AttributeValue { N = userId } }
-                }
-            };
-
+            GenericResultSet<DyUserDetailsCont> response = new();
             try
             {
-                var response = await _dycontext.GetItemAsync(request);
-                var test = GetObject<DyUserActivity>(response.Item);
-                if (response.Item == null)
-                {
-                    return NotFound();
-                }
-                return Ok(test);
+                var returnedObj = await _dynamodbUserInterface.GetUserbyId(userId);
+                response = _userDetailsConvert.convertResultSet<DyUserDetailsCont>(returnedObj, _mapper);
+                return Ok(response);
             }
             catch (AmazonDynamoDBException ex)
             {
+                response.status = false;
+                response.message = ex.Message;
+                response.resultSet = null;
                 //Handle DynamoDB exceptions
-                return StatusCode(500, ex.Message);
+                return StatusCode(((int)ex.StatusCode), response);
             }
         }
         [HttpGet("GetUserFriendList/{userId}")]
-        public async Task<ActionResult<DyUserActivity>> GetUserFriendList(string userId)
+        public async Task<IActionResult> GetUserFriendList(string userId)
         {
-            var tableName = "PortfolioUsersMessageAndFriendActivity";
-
-            var request = new GetItemRequest
-            {
-                TableName = tableName,
-                Key = new Dictionary<string, AttributeValue>
-                {
-                    { "UserId", new AttributeValue { N = userId } }
-                }
-            };
-
+            GenericResultSet<List<string>> response = new();
             try
             {
-                var response = await _dycontext.GetItemAsync(request);
-                if (response.Item == null)
-                {
-                    return NotFound();
-                }
-                return Ok(response.Item["friendList"].NS);
+                var returnedObj = await _dynamodbUserInterface.GetUserFriendList(userId);
+                return Ok(returnedObj);
             }
             catch (AmazonDynamoDBException ex)
             {
                 //Handle DynamoDB exceptions
-                return StatusCode(500, ex.Message);
+                response.status = false;
+                response.message = ex.Message;
+                response.resultSet = null;
+                //Handle DynamoDB exceptions
+                return StatusCode(((int)ex.StatusCode), response);
             }
         }
         [HttpGet("GetUserConfirmFriend/{userId}")]
-        public async Task<ActionResult<DyUserActivity>> GetUserConfirmFriend(string userId)
+        public async Task<IActionResult> GetUserConfirmFriend(string userId)
         {
-            var tableName = "PortfolioUsersMessageAndFriendActivity";
-
-            var request = new GetItemRequest
-            {
-                TableName = tableName,
-                Key = new Dictionary<string, AttributeValue>
-                {
-                    { "UserId", new AttributeValue { N = userId } }
-                }
-            };
-
+            GenericResultSet<List<string>> response = new();
             try
             {
-                var response = await _dycontext.GetItemAsync(request);
-                if (response.Item == null)
-                {
-                    return NotFound();
-                }
-      
-                return Ok(response.Item["confirmRequestUserId"].NS);
+                var returnedObj = await _dynamodbUserInterface.GetUserConfirmFriend(userId);
+                return Ok(returnedObj);
             }
             catch (AmazonDynamoDBException ex)
             {
                 //Handle DynamoDB exceptions
-                return StatusCode(500, ex.Message);
+                response.status = false;
+                response.message = ex.Message;
+                response.resultSet = null;
+                //Handle DynamoDB exceptions
+                return StatusCode(((int)ex.StatusCode), response);
             }
         }
 
         [HttpGet("GetUserRequestFriend/{userId}")]
-        public async Task<ActionResult<DyUserActivity>> GetUserRequestFriend(string userId)
+        public async Task<IActionResult> GetUserRequestFriend(string userId)
         {
-            var tableName = "PortfolioUsersMessageAndFriendActivity";
-
-            var request = new GetItemRequest
-            {
-                TableName = tableName,
-                Key = new Dictionary<string, AttributeValue>
-                {
-                    { "UserId", new AttributeValue { N = userId } }
-                }
-            };
-
+            GenericResultSet<List<string>> response = new();
             try
             {
-                var response = await _dycontext.GetItemAsync(request);
-                if (response.Item == null)
-                {
-                    return NotFound();
-                }
-             
-                return Ok(response.Item["sentRequestUserId"].NS);
+                var returnedObj = await _dynamodbUserInterface.GetUserRequestFriend(userId);
+                return Ok(returnedObj);
             }
             catch (AmazonDynamoDBException ex)
             {
                 //Handle DynamoDB exceptions
-                return StatusCode(500, ex.Message);
+                response.status = false;
+                response.message = ex.Message;
+                response.resultSet = null;
+                //Handle DynamoDB exceptions
+                return StatusCode(((int)ex.StatusCode), response);
             }
         }
 
 
-        [HttpGet("GetUserMessages/{userId}/{friendId}")]
-        public async Task<ActionResult<UserMessages>> GetUserMessages(string userId, string friendId)
+        [HttpGet("GetUserMessagesWithFriend/{userId}/{friendId}")]
+        public async Task<IActionResult> GetUserMessagesWithFriend(string userId, string friendId)
         {
-            var tableName = "UserMessages";
-      
-            var request = new ScanRequest
-            {
-                TableName = tableName,
-                FilterExpression = "friendId = :v_FriendId AND userId = :v_UserId",
-                ExpressionAttributeValues = new Dictionary<string, AttributeValue>
-            {
-                {":v_FriendId", new AttributeValue {N = friendId}},
-                {":v_UserId", new AttributeValue {N = userId}}
-            }
-            };
+            GenericResultSet<List<DyUserMessagesCont>> response = new();
             try
             {
-                var response = await _dycontext.ScanAsync(request);
+                var returnedObj = await _dynamodbUserInterface.GetUserMessagesWithfriend(userId, friendId);
+                response = _userMessageListConvert.convertResultSet<List<DyUserMessagesCont>>(returnedObj, _mapper);
                 return Ok(response);
             }
             catch (AmazonDynamoDBException ex)
             {
                 //Handle DynamoDB exceptions
-                return StatusCode(500, ex.Message);
+                response.status = false;
+                response.message = ex.Message;
+                response.resultSet = null;
+                //Handle DynamoDB exceptions
+                return StatusCode(((int)ex.StatusCode), response);
+            }
+        }
+
+        [HttpGet("GetUserMessages/{userId}")]
+        public async Task<IActionResult> GetUserMessages(string userId)
+        {
+            GenericResultSet<List<DyUserMessagesCont>> response = new();
+            try
+            {
+                var returnedObj = await _dynamodbUserInterface.GetUserMessages(userId);
+                response = _userMessageListConvert.convertResultSet<List<DyUserMessagesCont>>(returnedObj, _mapper);
+                return Ok(response);
+            }
+            catch (AmazonDynamoDBException ex)
+            {
+                //Handle DynamoDB exceptions
+                response.status = false;
+                response.message = ex.Message;
+                response.resultSet = null;
+                //Handle DynamoDB exceptions
+                return StatusCode(((int)ex.StatusCode), response);
             }
         }
     }

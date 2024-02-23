@@ -23,8 +23,11 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddAutoMapper(typeof(Program));
 builder.Services.AddScoped<ICandidateInterface, CandidateService>();
+builder.Services.AddScoped<IDynamodbUserOperations, DynamodbUserOperations>();
 builder.Services.AddScoped<ICandidateOperations, CandidateOperations>();
 builder.Services.AddScoped<ILocationOperations, LocationOperations>();
+builder.Services.AddScoped<IDynamodbUserOperations, DynamodbUserOperations>();
+builder.Services.AddScoped<IDynamoUserInterface, DyUserService>();
 
 builder.Services.AddScoped<ILocationInterface, LocationServices>();
 builder.Services.AddScoped<IHttpOperations, HttpOperations>();
